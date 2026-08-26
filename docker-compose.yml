@@ -1,0 +1,17 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: pousada_sesmarias_db
+    restart: always
+    environment:
+      POSTGRES_USER: sesmarias_admin
+      POSTGRES_PASSWORD: senha_segura_dev
+      POSTGRES_DB: sesmarias_dev
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+

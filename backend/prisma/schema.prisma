@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MANAGER
+  RECEPTION
+  READONLY
+}
+
+enum RoomStatus {
+  AVAILABLE
+  OCCUPIED
+  CLEANING
+  MAINTENANCE
+  BLOCKED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  PIX
+  OTHER
+}
+
+enum PaymentStatus {
+  VALID
+  REFUNDED
+  CANCELED
+}
+
+model User {
+  id            String        @id @default(uuid())
+  name          String
+  email         String        @unique
+  password_hash String
+  role          Role          @default(RECEPTION)
+  active        Boolean       @default(true)
+  created_at    DateTime      @default(now())
+  updated_at    DateTime      @updatedAt
+  audit_logs    AuditLog[]
+  reservations  Reservation[]
+  payments      Payment[]
+
+  @@map("users")
+}
+
+model Guest {
+  id           String        @id @default(uuid())
+  name         String
+  document     String        @unique
+  phone        String?
+  email        String?
+  notes        String?
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  reservations Reservation[]
+
+  @@map("guests")
+}
+
+model Room {
+  id           String        @id @default(uuid())
+  number       String        @unique
+  name         String?
+  category     String?
+  capacity     Int           @default(2)
+  daily_rate   Decimal       @db.Decimal(10, 2)
+  status       RoomStatus    @default(AVAILABLE)
+  description  String?
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  reservations Reservation[]
+
+  @@map("rooms")
+}
+
+model Reservation {
+  id               String            @id @default(uuid())
+  check_in         DateTime
+  check_out        DateTime
+  number_of_guests Int               @default(1)
+  total_price      Decimal           @db.Decimal(10, 2)
+  status           ReservationStatus @default(PENDING)
+  notes            String?
+  guest_id         String
+  room_id          String
+  guest            Guest             @relation(fields: [guest_id], references: [id], onDelete: Restrict)
+  room             Room              @relation(fields: [room_id], references: [id], onDelete: Restrict)
+  user_id          String?
+  user             User?             @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  payments         Payment[]
+  created_at       DateTime          @default(now())
+  updated_at       DateTime          @updatedAt
+
+  @@map("reservations")
+}
+
+model Payment {
+  id             String        @id @default(uuid())
+  reservation_id String
+  amount         Decimal       @db.Decimal(10, 2)
+  payment_method PaymentMethod
+  reference      String?
+  registered_by  String
+  status         PaymentStatus @default(VALID)
+  notes          String?
+  created_at     DateTime      @default(now())
+
+  reservation    Reservation   @relation(fields: [reservation_id], references: [id], onDelete: Restrict)
+  user           User          @relation(fields: [registered_by], references: [id], onDelete: Restrict)
+
+  @@map("payments")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  user_id    String
+  action     String   
+  details    String?  
+  ip         String?  
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id])
+}
+
+
+

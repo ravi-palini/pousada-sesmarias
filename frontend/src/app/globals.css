@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-main: #f8faf7;
+    --card-bg: #ffffff;
+    --text-primary: #1c2e24;
+    --text-secondary: #4a5d52;
+    --primary-green: #24583b;
+    --primary-green-hover: #1b442d;
+    --accent-earth: #8a5a36;
+    --border-subtle: #e2e8e2;
+  }
+
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Foco visível acessível para navegação clara por teclado */
+  :focus-visible {
+    outline: 3px solid #24583b;
+    outline-offset: 2px;
+  }
+}
